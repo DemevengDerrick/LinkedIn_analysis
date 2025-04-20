@@ -17,13 +17,12 @@ pacman::p_load(tidyverse, readxl, ggiraph)
 #' 
 #' 
 line_plot <- function(data){
-  line_plot <- data |>
+  data |>
     dplyr::mutate(Date = lubridate::as_date(Date, format = "%m/%d/%Y")) |>
     ggplot2::ggplot() +
-    ggiraph::geom_line_interactive(aes(x = Date, y = Impressions, tooltip = Impressions, data_id = Date))
-  
-  ggiraph::girafe(ggobj = line_plot)
-  
+    ggplot2::geom_line(aes(x = Date, y = Impressions), color = "blue") +
+    ggplot2::geom_line(aes(x = Date, y = Engagements), color = "green4") +
+    ggplot2::theme_minimal()
 }
 
 
@@ -40,7 +39,8 @@ scatter_plot_eng_imp <- function(data){
     dplyr::mutate(Date = lubridate::as_date(Date, format = "%m/%d/%Y")) |>
     ggplot2::ggplot(aes(x = Engagements, y = Impressions)) +
     ggplot2::geom_point() +
-    ggplot2::geom_smooth(method = "glm")
+    ggplot2::geom_smooth(method = "glm") +
+    ggplot2::theme_minimal()
 }
 
 

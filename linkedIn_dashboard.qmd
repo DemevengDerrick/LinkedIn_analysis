@@ -1,0 +1,205 @@
+---
+title: "Derrick Demeveng's LinkedIn Activity"
+format: 
+  dashboard:
+    nav-buttons: [linkedin]
+    linkedin: https://www.linkedin.com/in/demeveng-derrick/
+logo: image/LinkedIn_icon.svg
+---
+
+```{r}
+
+if(!require("pacman")) install.packages("pacman")
+
+pacman::p_load(tidyverse, readxl, ggiraph)
+
+source("helper_functions.R")
+```
+
+```{r}
+
+linkedin_engagement <- readxl::read_xlsx("input/Content_2024-04-21_2025-04-20_DerrickDEMEVENG.xlsx", sheet = "ENGAGEMENT")
+linkedin_discovery <- readxl::read_xlsx("input/Content_2024-04-21_2025-04-20_DerrickDEMEVENG.xlsx", sheet = "DISCOVERY")
+linkedin_new_followers <- readxl::read_xlsx("input/Content_2024-04-21_2025-04-20_DerrickDEMEVENG.xlsx", sheet = "FOLLOWERS", skip = 2)
+```
+
+```{r}
+total_impressions <- linkedin_discovery |>
+  dplyr::filter(`Overall Performance` == "Impressions") |>
+  dplyr::pull(`4/21/2024 - 4/20/2025`)
+
+total_members_reached <- linkedin_discovery |>
+  dplyr::filter(`Overall Performance` == "Members reached") |>
+  dplyr::pull(`4/21/2024 - 4/20/2025`)
+
+total_new_followers <- linkedin_new_followers$`New followers` |> sum()
+```
+
+# Content Engagement
+
+## KPIs
+
+```{r}
+#| content: valuebox
+#| title: "Total Impressions"
+#| icon: star-fill
+#| color: "green"
+
+list(
+  value = total_impressions
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "New Followers"
+#| icon: person-fill-check
+#| color: "green"
+
+list(
+  value = total_new_followers
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "New Members Reached"
+#| icon: people-fill
+#| color: "green"
+
+list(
+  value = total_members_reached
+)
+```
+
+## Visualization
+
+### Line plot
+
+```{r}
+#| title: Line plot of Engagement versus Impressions
+
+line_plot(linkedin_engagement)
+```
+
+### Scatter plot
+
+```{r}
+#| title: Scatter plot of Engagement versus Impressions
+
+scatter_plot_eng_imp(linkedin_engagement)
+```
+
+### Heat Map
+
+```{r}
+#| title: Heatmap of Post Impressions by Days of the Week
+
+linkedin_engagement |>
+  dplyr::mutate(
+    day.of.the.week = lubridate::wday(lubridate::as_date(Date, format = "%m/%d/%Y"), label = T),
+    month.of.year = lubridate::month(lubridate::as_date(Date, format = "%m/%d/%Y"), label = T)
+  ) |>
+  dplyr::group_by(day.of.the.week, month.of.year) |>
+  dplyr::summarise(
+    total_impression = sum(Impressions)
+  ) |>
+  ggplot2::ggplot() +
+  ggplot2::geom_tile(aes(x = month.of.year, y = day.of.the.week, fill = total_impression), color = "white", size = 0.5) +
+  ggplot2::scale_fill_distiller(direction = 1, palette = "Reds") +
+  ggplot2::labs(fill = "Impressions") +
+  ggplot2::theme(
+    legend.position = "bottom",
+    legend.text = element_text(angle = 90)
+  )
+```
+
+# Followers
+
+## KPIs
+
+```{r}
+#| content: valuebox
+#| title: "Total Impressions"
+#| icon: star-fill
+#| color: "green"
+
+list(
+  value = total_impressions
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "New Followers"
+#| icon: person-fill-check
+#| color: "green"
+
+list(
+  value = total_new_followers
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "New Members Reached"
+#| icon: people-fill
+#| color: "green"
+
+list(
+  value = total_members_reached
+)
+```
+
+## Visualization
+
+### Line plot of followers
+
+```{r}
+#| title: New Followers Trend
+#| 
+linkedin_new_followers |>
+  dplyr::mutate(Date = lubridate::as_date(Date, format = "%m/%d/%Y")) |>
+  ggplot2::ggplot() +
+  ggplot2::geom_line(aes(x = Date, y = `New followers`), color = "blue4") +
+  ggplot2::geom_smooth(aes(x = Date, y = `New followers`), color = "red") +
+  ggplot2::theme_minimal()
+
+```
+
+### Summary table
+
+```{r}
+#| title: Headmap of New followers by Days of the Week
+
+linkedin_new_followers |>
+  dplyr::mutate(
+    day.of.the.week = lubridate::wday(lubridate::as_date(Date, format = "%m/%d/%Y"), label = T),
+    month.of.year = lubridate::month(lubridate::as_date(Date, format = "%m/%d/%Y"), label = T)
+  ) |>
+  dplyr::group_by(day.of.the.week, month.of.year) |>
+  dplyr::summarise(
+    total_followers = sum(`New followers`)
+  ) |>
+  ggplot2::ggplot() +
+  ggplot2::geom_tile(aes(x = month.of.year, y = day.of.the.week, fill = total_followers), color = "white", size = 0.5) +
+  ggplot2::scale_fill_distiller(direction = 1, palette = "Reds") +
+  ggplot2::labs(fill = "Impressions") +
+  ggplot2::theme(
+    legend.position = "bottom",
+    legend.text = element_text(angle = 90)
+  )
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
