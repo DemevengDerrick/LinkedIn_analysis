@@ -11,7 +11,7 @@ logo: image/LinkedIn_icon.svg
 
 if(!require("pacman")) install.packages("pacman")
 
-pacman::p_load(tidyverse, readxl, ggiraph)
+pacman::p_load(tidyverse, readxl, ggiraph, xts, forecast)
 
 source("helper_functions.R")
 ```
@@ -191,8 +191,51 @@ linkedin_new_followers |>
   )
 
 ```
+# Time Series & Forcasting
 
+## Series
 
+### Time Series Decomposition
+
+```{r}
+#| title: Seasonal Decoposition Analysis
+
+for_ts <- linkedin_new_followers |>
+  dplyr::mutate(
+    Date = lubridate::as_date(Date, format = "%m/%d/%Y"),
+    day.of.the.week = lubridate::wday(lubridate::as_date(Date, format = "%m/%d/%Y"), label = T),
+    month.of.year = lubridate::month(lubridate::as_date(Date, format = "%m/%d/%Y"), label = T)
+  )
+
+ts(for_ts$`New followers`, frequency = 7) |> 
+  stl(elecequip, t.window=13, s.window="periodic", robust=TRUE) |>
+  ggplot2::autoplot() +
+  ggplot2::theme_minimal() +
+  ggplot2::xlab("Week")
+
+```
+
+### Forcasting
+
+```{r}
+#| title: Forcasting
+
+for_ts <- linkedin_new_followers |>
+  dplyr::mutate(
+    Date = lubridate::as_date(Date, format = "%m/%d/%Y"),
+    day.of.the.week = lubridate::wday(lubridate::as_date(Date, format = "%m/%d/%Y"), label = T),
+    month.of.year = lubridate::month(lubridate::as_date(Date, format = "%m/%d/%Y"), label = T)
+  )
+
+ts(for_ts$`New followers`, frequency = 7) |> 
+  stl(elecequip, t.window=13, s.window="periodic", robust=TRUE) |>
+  forecast::forecast(method="naive") |>
+  ggplot2::autoplot() +
+  ggplot2::ylab("New Followers") +
+  ggplot2::xlab("Week") +
+  ggplot2::theme_minimal()
+
+```
 
 
 
